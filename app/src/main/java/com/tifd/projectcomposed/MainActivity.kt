@@ -49,6 +49,7 @@ fun MyScreen() {
     var inputText by remember { mutableStateOf("") }
     var isImageTextVisible by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isFormVisible by remember { mutableStateOf(true) } // State baru untuk kontrol visibilitas
 
     Column(
         modifier = Modifier
@@ -81,22 +82,25 @@ fun MyScreen() {
 
         Text(text = text)
         Spacer(modifier = Modifier.height(16.dp))
-        TextField(
-            value = inputText,
-            onValueChange = { inputText = it },
-            label = { Text("Enter text") }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = {
-            if (inputText.isBlank()) {
-                errorMessage = "Kasih nama dulu kak ^^"
-            } else {
-                text = "Not bad, I'll let you call me $inputText"
-                isImageTextVisible = false // Menyembunyikan teks gambar setelah submit
-                errorMessage = null // Menghapus pesan kesalahan jika ada
+        if (isFormVisible) {
+            TextField(
+                value = inputText,
+                onValueChange = { inputText = it },
+                label = { Text("Enter text") }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = {
+                if (inputText.isBlank()) {
+                    errorMessage = "Input cannot be empty"
+                } else {
+                    text = "Then from now on call me, $inputText"
+                    isImageTextVisible = false // Menyembunyikan teks gambar setelah submit
+                    errorMessage = null // Menghapus pesan kesalahan jika ada
+                    isFormVisible = false // Menghilangkan TextField dan Button
+                }
+            }) {
+                Text("Submit")
             }
-        }) {
-            Text("Submit")
         }
     }
 }
