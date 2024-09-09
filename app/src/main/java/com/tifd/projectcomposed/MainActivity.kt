@@ -91,9 +91,9 @@ fun MyScreen() {
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = {
                 if (inputText.isBlank()) {
-                    errorMessage = "Input cannot be empty"
+                    errorMessage = "Kasih nama dulu >:("
                 } else {
-                    text = "Then from now on call me, $inputText"
+                    text = "Not bad, you can call me $inputText"
                     isImageTextVisible = false // Menyembunyikan teks gambar setelah submit
                     errorMessage = null // Menghapus pesan kesalahan jika ada
                     isFormVisible = false // Menghilangkan TextField dan Button
