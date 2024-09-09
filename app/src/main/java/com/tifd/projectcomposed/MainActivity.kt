@@ -26,13 +26,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tifd.projectcomposed.ui.theme.ProjectComposeDTheme
-import com.tifd.projectcomposed.R
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ProjectComposeDTheme {
+            ProjectComposeDTheme (dynamicColor = false){
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -48,6 +47,8 @@ class MainActivity : ComponentActivity() {
 fun MyScreen() {
     var text by remember { mutableStateOf("") }
     var inputText by remember { mutableStateOf("") }
+    var isImageTextVisible by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -60,6 +61,24 @@ fun MyScreen() {
             painter = painterResource(id = R.drawable.kuromi),
             contentDescription = "Sample Image"
         )
+
+        if (isImageTextVisible) {
+            Text(
+                text = "Give me a name!",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+
+        errorMessage?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+
         Text(text = text)
         Spacer(modifier = Modifier.height(16.dp))
         TextField(
@@ -69,7 +88,13 @@ fun MyScreen() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
-            text = inputText
+            if (inputText.isBlank()) {
+                errorMessage = "Kasih nama dulu kak ^^"
+            } else {
+                text = "Not bad, I'll let you call me $inputText"
+                isImageTextVisible = false // Menyembunyikan teks gambar setelah submit
+                errorMessage = null // Menghapus pesan kesalahan jika ada
+            }
         }) {
             Text("Submit")
         }
