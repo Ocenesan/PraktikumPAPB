@@ -46,8 +46,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyScreen() {
     var text by remember { mutableStateOf("") }
-    var inputText by remember { mutableStateOf("") }
-    var isImageTextVisible by remember { mutableStateOf(true) }
+    var namaText by remember { mutableStateOf("") }
+    var numText by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isFormVisible by remember { mutableStateOf(true) } // State baru untuk kontrol visibilitas
 
@@ -58,18 +58,6 @@ fun MyScreen() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.kuromi),
-            contentDescription = "Sample Image"
-        )
-
-        if (isImageTextVisible) {
-            Text(
-                text = "Give me a name!",
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
 
         errorMessage?.let {
             Text(
@@ -81,20 +69,40 @@ fun MyScreen() {
         }
 
         Text(text = text)
+
         Spacer(modifier = Modifier.height(16.dp))
         if (isFormVisible) {
             TextField(
-                value = inputText,
-                onValueChange = { inputText = it },
-                label = { Text("Enter text") }
+                value = namaText,
+                onValueChange = { namaText = it },
+                label = { Text("Masukkan nama") },
+                leadingIcon = {
+                    Image(
+                        painter = painterResource(id = R.drawable.baseline_person_24),
+                        contentDescription = "Person Icon"
+                    )
+                }
             )
             Spacer(modifier = Modifier.height(16.dp))
+            TextField(
+                value = numText,
+                onValueChange = {
+                    val filtered = it.filter { char -> char.isDigit() }
+                    numText = filtered
+                },
+                label = { Text("Masukkan NIM") },
+                leadingIcon = {
+                    Image(
+                        painter = painterResource(id = R.drawable.baseline_123_24), // ganti dengan ikon yang kamu inginkan
+                        contentDescription = "Number Icon"
+                    )
+                }
+            )
             Button(onClick = {
-                if (inputText.isBlank()) {
-                    errorMessage = "Kasih nama dulu >:("
+                if (namaText.isBlank() || numText.isBlank()) {
+                    errorMessage = "Tolong isi semua field"
                 } else {
-                    text = "Not bad, you can call me $inputText"
-                    isImageTextVisible = false // Menyembunyikan teks gambar setelah submit
+                    text = "Nama : $namaText/n NIM : $numText"
                     errorMessage = null // Menghapus pesan kesalahan jika ada
                     isFormVisible = false // Menghilangkan TextField dan Button
                 }
