@@ -4,17 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+//import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,39 +68,50 @@ fun MyScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
         if (isFormVisible) {
-            TextField(
-                value = namaText,
-                onValueChange = { namaText = it },
-                label = { Text("Masukkan nama") },
-                leadingIcon = {
-                    Image(
-                        painter = painterResource(id = R.drawable.baseline_person_24),
-                        contentDescription = "Person Icon"
-                    )
-                }
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.baseline_person_24),
+                    contentDescription = "Person Icon",
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                OutlinedTextField(
+                    value = namaText,
+                    onValueChange = { namaText = it },
+                    label = { Text("Masukkan nama") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             Spacer(modifier = Modifier.height(16.dp))
-            TextField(
-                value = numText,
-                onValueChange = {
-                    val filtered = it.filter { char -> char.isDigit() }
-                    numText = filtered
-                },
-                label = { Text("Masukkan NIM") },
-                leadingIcon = {
-                    Image(
-                        painter = painterResource(id = R.drawable.baseline_123_24), // ganti dengan ikon yang kamu inginkan
-                        contentDescription = "Number Icon"
-                    )
-                }
-            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.baseline_123_24),
+                    contentDescription = "Number Icon",
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                OutlinedTextField(
+                    value = numText,
+                    onValueChange = {
+                        val filtered = it.filter { char -> char.isDigit() }
+                        numText = filtered
+                    },
+                    label = { Text("Masukkan NIM") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             Button(onClick = {
                 if (namaText.isBlank() || numText.isBlank()) {
                     errorMessage = "Tolong isi semua field"
                 } else {
-                    text = "Nama : $namaText/n NIM : $numText"
+                    text = "Nama : $namaText\n NIM : $numText"
                     errorMessage = null // Menghapus pesan kesalahan jika ada
-                    isFormVisible = false // Menghilangkan TextField dan Button
+                    //isFormVisible = false // Menghilangkan TextField dan Button
                 }
             }) {
                 Text("Submit")
