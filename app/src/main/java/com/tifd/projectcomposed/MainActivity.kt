@@ -1,16 +1,16 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.tifd.projectcomposed
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-//import androidx.compose.material3.TextField
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +18,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,11 +43,13 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyScreen() {
+    val context = LocalContext.current
     var text by remember { mutableStateOf("") }
     var namaText by remember { mutableStateOf("") }
     var numText by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isFormVisible by remember { mutableStateOf(true) } // State baru untuk kontrol visibilitas
+    val isButtonEnabled = namaText.isNotBlank() && numText.isNotBlank() // Kondisi button aktif
 
     Column(
         modifier = Modifier
@@ -65,8 +69,8 @@ fun MyScreen() {
         }
 
         Text(text = text)
-
         Spacer(modifier = Modifier.height(16.dp))
+
         if (isFormVisible) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -111,9 +115,21 @@ fun MyScreen() {
                 } else {
                     text = "Nama : $namaText\n NIM : $numText"
                     errorMessage = null // Menghapus pesan kesalahan jika ada
-                    //isFormVisible = false // Menghilangkan TextField dan Button
+                    // isFormVisible = false // Menghilangkan TextField dan Button
                 }
-            }) {
+            },
+                enabled = isButtonEnabled, // Mengatur button aktif/nonaktif
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isButtonEnabled) MaterialTheme.colorScheme.primary else Color.Gray
+                ),
+                modifier = Modifier.combinedClickable(
+                    onClick = { /* Tetap isi meskipun kosong untuk mengaktifkan onLongClick */ },
+                    onLongClick = {
+                        // Menampilkan toast pada long click
+                        Toast.makeText(context, "Nama: $namaText, NIM: $numText", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            ) {
                 Text("Submit")
             }
         }
