@@ -109,28 +109,30 @@ fun MyScreen() {
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            Button(onClick = {
-                if (namaText.isBlank() || numText.isBlank()) {
-                    errorMessage = "Tolong isi semua field"
-                } else {
-                    text = "Nama : $namaText\n NIM : $numText"
-                    errorMessage = null // Menghapus pesan kesalahan jika ada
-                    // isFormVisible = false // Menghilangkan TextField dan Button
-                }
-            },
-                enabled = isButtonEnabled, // Mengatur button aktif/nonaktif
+            Button(
+                onClick = {
+                    if (namaText.isBlank() || numText.isBlank()) {
+                        errorMessage = "Tolong isi semua field"
+                    } else {
+                        text = "Nama : $namaText\n NIM : $numText"
+                        errorMessage = null
+                    }
+                },
+                enabled = isButtonEnabled,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (isButtonEnabled) MaterialTheme.colorScheme.primary else Color.Gray
-                ),
-                modifier = Modifier.combinedClickable(
-                    onClick = { /* Tetap isi meskipun kosong untuk mengaktifkan onLongClick */ },
-                    onLongClick = {
-                        // Menampilkan toast pada long click
-                        Toast.makeText(context, "Nama: $namaText, NIM: $numText", Toast.LENGTH_SHORT).show()
-                    }
                 )
             ) {
-                Text("Submit")
+                Box(
+                    modifier = Modifier.combinedClickable(
+                        onClick = {},
+                        onLongClick = {
+                            Toast.makeText(context, "Nama: $namaText\nNIM: $numText", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                ) {
+                    Text("Submit")
+                }
             }
         }
     }
