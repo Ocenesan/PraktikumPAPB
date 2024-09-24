@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1079416621897",
+    "project_id": "praktikum-papb-ce431",
+    "storage_bucket": "praktikum-papb-ce431.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1079416621897:android:659c570ab2c9c28554a898",
+        "android_client_info": {
+          "package_name": "com.tifd.projectcomposed"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAw9GDS7J35H4DszOGzSoxeWj7_L4AGmeg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
