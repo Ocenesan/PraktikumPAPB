@@ -8,6 +8,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -99,20 +100,98 @@ fun MataKuliahListScreen() {
 fun OutlinedCardExample(mataKuliah: mataKuliah) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = BorderStroke(1.dp, Color.Black),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
         modifier = Modifier
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth()
-            .wrapContentHeight()
+            .wrapContentHeight(),
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(4.dp) // Menambahkan sedikit bayangan
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Mata Kuliah: ${mataKuliah.namaMatkul}", style = MaterialTheme.typography.headlineSmall)
-            Text(text = "Ruang: ${mataKuliah.ruang}")
-            Text(text = "Hari: ${mataKuliah.hari}")
-            Text(text = "Jam: ${mataKuliah.jam}")
-            Text(text = "Praktikum: ${if (mataKuliah.is_praktikum) "Ya" else "Tidak"}")
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            // Mata Kuliah Title
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_book_24), // Drawable for mata kuliah
+                    contentDescription = "Mata Kuliah",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = mataKuliah.namaMatkul,
+                    style = MaterialTheme.typography.headlineSmall.copy(color = MaterialTheme.colorScheme.onSurface),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            Divider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), thickness = 1.dp)
+
+            // Ruang
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_location_on_24), // Drawable for room
+                    contentDescription = "Ruang",
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Ruang: ${mataKuliah.ruang}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            // Hari
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_calendar_month_24), // Drawable for day
+                    contentDescription = "Hari",
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Hari: ${mataKuliah.hari}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            // Jam
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_access_time_24), // Drawable for time
+                    contentDescription = "Jam",
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Jam: ${mataKuliah.jam}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            // Praktikum
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
+                Icon(
+                    painter = painterResource(id = if (mataKuliah.is_praktikum) R.drawable.baseline_check_circle_24 else R.drawable.baseline_cancel_24), // Drawable for praktikum
+                    contentDescription = "Praktikum",
+                    tint = if (mataKuliah.is_praktikum) Color.Green else Color.Red,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (mataKuliah.is_praktikum) "Praktikum" else "Praktikum",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }
