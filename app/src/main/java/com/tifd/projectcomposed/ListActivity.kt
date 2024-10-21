@@ -2,6 +2,7 @@ package com.tifd.projectcomposed
 
 import android.os.Bundle
 import android.util.Log
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -14,7 +15,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.tifd.projectcomposed.ui.theme.ProjectComposeDTheme
@@ -38,12 +41,14 @@ data class mataKuliah(
     val is_praktikum: Boolean = false
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MataKuliahListScreen() {
     val db = Firebase.firestore
     var mataKuliahList by remember { mutableStateOf(emptyList<mataKuliah>()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         Log.d("ListActivity", "Starting Firestore fetch")
@@ -77,19 +82,51 @@ fun MataKuliahListScreen() {
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        if (isLoading) {
-            CircularProgressIndicator()
-        } else if (mataKuliahList.isEmpty()) {
-            Text(errorMessage ?: "No data found")
-        } else {
-            LazyColumn {
-                items(mataKuliahList) { MataKuliah ->
-                    OutlinedCardExample(MataKuliah)
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(title = { Text("Jadwal Mata Kuliah") })
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    val intent = Intent(context, GithubProfile::class.java)
+                    startActivity(context, intent, null)
+                },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.github_logo_96), // Replace with your GitHub logo resource
+                    contentDescription = "GitHub Profile"
+                )
+            }
+        }
+    ){ innerPadding ->  // Use innerPadding to avoid content being obscured by system bars
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding), // Apply inner padding here
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .wrapContentSize(Alignment.Center)
+                )
+            } else if (mataKuliahList.isEmpty()) {
+                Text(
+                    text = errorMessage ?: "No data found",
+                    modifier = Modifier.padding(16.dp)
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp) // Consistent padding
+                ) {
+                    items(mataKuliahList) { MataKuliah ->
+                        OutlinedCardExample(MataKuliah)
+                        Spacer(modifier = Modifier.height(8.dp)) // Spacing between cards
+                    }
                 }
             }
         }
@@ -115,7 +152,6 @@ fun OutlinedCardExample(mataKuliah: mataKuliah) {
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            // Mata Kuliah Title
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_book_24), // Drawable for mata kuliah
@@ -131,9 +167,11 @@ fun OutlinedCardExample(mataKuliah: mataKuliah) {
                 )
             }
 
-            Divider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), thickness = 1.dp)
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            )
 
-            // Ruang
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_location_on_24), // Drawable for room
@@ -147,8 +185,6 @@ fun OutlinedCardExample(mataKuliah: mataKuliah) {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-
-            // Hari
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_calendar_month_24), // Drawable for day
@@ -162,8 +198,6 @@ fun OutlinedCardExample(mataKuliah: mataKuliah) {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-
-            // Jam
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_access_time_24), // Drawable for time
@@ -177,8 +211,6 @@ fun OutlinedCardExample(mataKuliah: mataKuliah) {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-
-            // Praktikum
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
                 Icon(
                     painter = painterResource(id = if (mataKuliah.is_praktikum) R.drawable.baseline_check_circle_24 else R.drawable.baseline_cancel_24), // Drawable for praktikum
