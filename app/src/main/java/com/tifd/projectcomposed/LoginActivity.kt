@@ -33,7 +33,7 @@ class LoginActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     LoginScreen(onLoginSuccess = {
-                        startActivity(Intent(this, MainActivity::class.java))
+                        startActivity(Intent(this, ListActivity::class.java))
                         finish() // Optional: Finish LoginActivity after successful login
                     })
                 }
