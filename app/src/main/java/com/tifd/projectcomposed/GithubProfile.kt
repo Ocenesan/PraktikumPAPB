@@ -21,7 +21,6 @@ import coil.compose.rememberImagePainter
 import com.tifd.projectcomposed.network.GitHubUser
 import com.tifd.projectcomposed.network.RetrofitClient
 import com.tifd.projectcomposed.ui.theme.ProjectComposeDTheme
-import kotlinx.coroutines.launch
 
 class GithubProfile : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

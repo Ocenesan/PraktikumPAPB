@@ -1,8 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("com.google.gms.google-services")
+    alias(libs.plugins.google.gms.google.services)
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -76,6 +77,11 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation (libs.coil.kt.coil.compose)
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.androidx.navigation.common.ktx)
+    implementation(libs.androidx.navigation.compose)
+    implementation (libs.androidx.room.runtime)
+    ksp (libs.androidx.room.compiler.v242)
+    implementation (libs.androidx.room.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -83,5 +89,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    //implementation("com.android.support:appcompat-v7:23.2.0")
 }
