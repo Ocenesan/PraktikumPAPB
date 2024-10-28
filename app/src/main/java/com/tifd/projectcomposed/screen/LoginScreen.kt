@@ -10,12 +10,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.tifd.projectcomposed.Navigation.Screen
 import com.tifd.projectcomposed.R
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit) {
+fun LoginScreen(navController: NavController, onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -85,9 +87,12 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        // Sign in success, update UI with the signed-in user's information
+                        // Sign in success, navigate to the main screen
                         Toast.makeText(context, "Login berhasil!", Toast.LENGTH_SHORT).show()
-                        onLoginSuccess() // Callback for successful login
+                        onLoginSuccess()
+                        navController.navigate(Screen.Matkul.route) { // Use navController.navigate
+                            launchSingleTop = true
+                        }
                     } else {
                         // If sign in fails, display a message to the user.
                         loginError = "Login gagal. Periksa email dan password Anda."
@@ -96,6 +101,14 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 }
         }) {
             Text("Login")
+        }
+        loginError?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
         }
     }
 }

@@ -1,9 +1,9 @@
 package com.tifd.projectcomposed.Navigation
 
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 
 data class Navigationitem(
     val title: String,
-    val icon: ImageVector,
+    val icon: Painter,
     val screen: Screen
 )

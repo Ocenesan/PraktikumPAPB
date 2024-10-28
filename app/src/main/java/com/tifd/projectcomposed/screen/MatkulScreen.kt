@@ -12,8 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.startActivity
-import android.content.Intent
 import android.util.Log
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -72,21 +70,21 @@ fun MatkulScreen() {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(title = { Text("Jadwal Mata Kuliah") })
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    val intent = Intent(context, GithubProfile::class.java)
-                    startActivity(context, intent, null)
-                },
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(
-                    painterResource(id = R.drawable.github_logo_96), // Replace with your GitHub logo resource
-                    contentDescription = "GitHub Profile"
-                )
-            }
         }
+//        floatingActionButton = {
+//            FloatingActionButton(
+//                onClick = {
+//                    val intent = Intent(context, GithubProfile::class.java)
+//                    startActivity(context, intent, null)
+//                },
+//                containerColor = MaterialTheme.colorScheme.primary
+//            ) {
+//                Icon(
+//                    painterResource(id = R.drawable.github_logo_96), // Replace with your GitHub logo resource
+//                    contentDescription = "GitHub Profile"
+//                )
+//            }
+//        }
     ){ innerPadding ->  // Use innerPadding to avoid content being obscured by system bars
         Column(
             modifier = Modifier
