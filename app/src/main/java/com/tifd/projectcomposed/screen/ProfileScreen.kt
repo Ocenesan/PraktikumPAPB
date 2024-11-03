@@ -2,6 +2,7 @@ package com.tifd.projectcomposed.screen
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,11 +30,13 @@ fun ProfileScreen() {
 
     // Fetch data using coroutine in LaunchedEffect
     LaunchedEffect(Unit) {
-        isLoading = true
+        Log.d("ProfileScreen", "Fetching data...") // Log before the request
         try {
-            user = RetrofitClient.apiService.getUser("Ocenesan") // Replace with the actual username
+            user = RetrofitClient.apiService.getUser("Ocenesan")
+            Log.d("ProfileScreen", "Data fetched: $user") // Log the fetched user
             isLoading = false
         } catch (e: Exception) {
+            Log.e("ProfileScreen", "Error fetching data: ${e.message}") // Log the error
             errorMessage = "Failed to fetch data: ${e.message}"
             isLoading = false
         }

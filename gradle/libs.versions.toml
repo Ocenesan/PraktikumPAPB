@@ -31,10 +31,11 @@ navigationCommonKtx = "2.8.3"
 navigationCompose = "2.8.3"
 roomCompiler = "2.4.2"
 roomRuntime = "2.6.1"
+runtimeLivedata = "<latest_version>"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-navigation-compose-v275 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
+androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtimeLivedata" }
 coil-kt-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilComposeVersion" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
@@ -65,7 +66,6 @@ retrofit2-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref =
 androidx-navigation-common-ktx = { group = "androidx.navigation", name = "navigation-common-ktx", version.ref = "navigationCommonKtx" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
-androidx-room-compiler-v242 = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref ="roomRuntime"}
 

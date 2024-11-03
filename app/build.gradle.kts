@@ -2,8 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
-    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.20"
     alias(libs.plugins.ksp)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -78,11 +79,11 @@ dependencies {
     implementation (libs.coil.kt.coil.compose)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.androidx.navigation.common.ktx)
-    //implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.navigation.compose.v275)
+    implementation(libs.androidx.navigation.compose)
     implementation (libs.androidx.room.runtime)
-    ksp (libs.androidx.room.compiler.v242)
+    ksp (libs.androidx.room.compiler)
     implementation (libs.androidx.room.ktx)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -90,4 +91,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
 }
