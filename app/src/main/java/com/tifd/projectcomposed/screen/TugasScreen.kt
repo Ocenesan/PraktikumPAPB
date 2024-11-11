@@ -2,10 +2,20 @@ package com.tifd.projectcomposed.screen
 
 import android.Manifest
 import android.app.Application
+import android.content.ContentValues
+import android.content.Context
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.*
@@ -34,19 +44,10 @@ fun TugasScreen() {
     val mainViewModel: MainViewModel = viewModel(
         factory = MainViewModelFactory(application)
     )
-
     var matkul by remember { mutableStateOf("") }
     var detailTugas by remember { mutableStateOf("") }
     val tugasList by mainViewModel.tugasList.observeAsState(initial = emptyList())
     var showCamera by remember { mutableStateOf(false) }
-
-    // Launcher untuk meminta izin kamera
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            showCamera = isGranted // Tampilkan kamera jika izin diberikan
-        }
-    )
 
     Column(
         modifier = Modifier
@@ -85,8 +86,6 @@ fun TugasScreen() {
                 // Cek izin kamera sebelum menampilkan kamera
                 if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                     showCamera = true
-                } else {
-                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                 }
             }) {
                 Text(if (showCamera) "Close Camera" else "Open Camera")
@@ -96,8 +95,15 @@ fun TugasScreen() {
         Spacer(modifier = Modifier.height(16.dp))
 
         if (showCamera) {
-            CameraXPreview() // Tampilkan pratinjau kamera
+            CameraXPreview(onImageCaptured = { imageUri ->
+                // Handle hasil foto, bisa disimpan ke ViewModel atau lokasi lain
+                showCamera = false // Menutup kamera setelah foto diambil
+
+                // Contoh: Menampilkan URI gambar dalam Toast
+                Toast.makeText(context, "Gambar disimpan di: $imageUri", Toast.LENGTH_LONG).show()
+            })
         }
+
 
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             items(tugasList) { tugas ->
@@ -144,31 +150,118 @@ fun TugasCard(tugas: Tugas, onTaskCompleted: (Tugas) -> Unit) {
 }
 
 @Composable
-fun CameraXPreview() {
+fun CameraXPreview(onImageCaptured: (Uri) -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
     val previewView = remember { PreviewView(context) }
+    var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
+    var lensFacing by remember { mutableIntStateOf(CameraSelector.LENS_FACING_BACK) }
 
-    LaunchedEffect(cameraProviderFuture) {
+    LaunchedEffect(cameraProviderFuture, lensFacing) {
         val cameraProvider = cameraProviderFuture.get()
-        val preview = androidx.camera.core.Preview.Builder().build()
-        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+        val preview = Preview.Builder().build().also {
+            it.setSurfaceProvider(previewView.surfaceProvider)
+        }
+        val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
 
-        preview.setSurfaceProvider(previewView.surfaceProvider)
+        imageCapture = ImageCapture.Builder().build()
 
         try {
             cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview)
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner, cameraSelector, preview, imageCapture
+            )
         } catch (exc: Exception) {
             exc.printStackTrace()
         }
     }
 
-    AndroidView(
-        factory = { previewView },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(400.dp)
+    // Launcher untuk meminta izin kamera
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { granted ->
+            val cameraGranted = granted.getOrDefault(Manifest.permission.CAMERA, false)
+            val storageGranted = granted.getOrDefault(Manifest.permission.WRITE_EXTERNAL_STORAGE, false)
+            if (cameraGranted && storageGranted) {
+                // Izin diberikan
+                Log.d("CameraContent", "Izin diberikan") // Tambahkan logging
+            } else {
+                Toast.makeText(context, "Izin Kamera dan Penyimpanan dibutuhkan", Toast.LENGTH_SHORT).show()
+                Log.d("CameraContent", "Izin ditolak") // Tambahkan logging
+            }
+        }
+    )
+
+    Column {
+        Box(modifier = Modifier.fillMaxWidth().height(400.dp)) {
+            AndroidView(
+                factory = { previewView },
+                modifier = Modifier
+                    .size(width = 300.dp, height = 150.dp)
+                    .align(Alignment.Center)
+            )
+            Box(modifier = Modifier.fillMaxWidth().align(Alignment.TopEnd)) {
+                IconButton(
+                    onClick = {
+                        lensFacing =
+                            if (lensFacing == CameraSelector.LENS_FACING_BACK) CameraSelector.LENS_FACING_FRONT
+                            else CameraSelector.LENS_FACING_BACK
+                    },
+                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(if (lensFacing == CameraSelector.LENS_FACING_BACK) R.drawable.baseline_flip_camera_ios_24 else R.drawable.baseline_flip_camera_ios_24),
+                        contentDescription = "Flip Camera",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
+            if (imageCapture != null) {
+                Box(modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)) {
+                    Button(onClick = {
+                        launcher.launch(
+                            arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        )
+                        takePhoto(context, imageCapture, onImageCaptured)
+                    },
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(8.dp)) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_radio_button_checked_32), // Ganti dengan drawable Anda
+                            contentDescription = "Take Photo",
+                            modifier = Modifier.size(32.dp) // Sesuaikan ukuran
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text("Take Photo")
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun takePhoto(context: Context, imageCapture: ImageCapture?, onImageCaptured: (Uri) -> Unit) {
+    val contentValues = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, System.currentTimeMillis().toString())
+        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/TugasApp")
+        }
+    }
+    val outputOptions = ImageCapture.OutputFileOptions
+        .Builder(context.contentResolver, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+        .build()
+
+    imageCapture?.takePicture(
+        outputOptions,
+        ContextCompat.getMainExecutor(context),
+        object: ImageCapture.OnImageSavedCallback {
+            override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                onImageCaptured(output.savedUri!!)
+            }
+            override fun onError(exc: ImageCaptureException) {
+                Toast.makeText(context, "Gagal mengambil gambar: ${exc.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     )
 }
