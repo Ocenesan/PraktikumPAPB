@@ -12,6 +12,9 @@ class MainViewModel(private val tugasRepository: TugasRepository) : ViewModel() 
     private val _tugasList = tugasRepository.getAllTugas()
     val tugasList: LiveData<List<Tugas>> get() = _tugasList
 
+    private val _tugasWithPhotos = MutableLiveData<List<Tugas>>()
+    val tugasWithPhotos: LiveData<List<Tugas>> get() = _tugasWithPhotos
+
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> get() = _error
 
@@ -20,23 +23,58 @@ class MainViewModel(private val tugasRepository: TugasRepository) : ViewModel() 
 
     init {
         fetchAllTugas()
+        fetchTugasWithPhotos()
     }
 
-    private fun fetchAllTugas(){
+    private fun fetchAllTugas() {
         viewModelScope.launch {
-            tugasRepository.getAllTugas()
+            try {
+                tugasRepository.getAllTugas()
+            } catch (e: Exception) {
+                _error.postValue("Failed to fetch Tugas: ${e.message}")
+            }
         }
     }
 
-    fun addTugas(matkul: String, detailTugas: String){
-        val newTugas = Tugas(matkul = matkul, detailTugas = detailTugas, selesai = false)
+    fun addTugas(matkul: String, detailTugas: String, photoUri: String? = null) {
+        if (matkul.isBlank() || detailTugas.isBlank()) {
+            _error.value = "Matkul and Detail Tugas cannot be empty"
+            return
+        }
+
+        val newTugas = Tugas(
+            matkul = matkul,
+            detailTugas = detailTugas,
+            selesai = false,
+            photoUri = photoUri // Optional photo URI
+        )
+
         viewModelScope.launch {
-            tugasRepository.insert(newTugas)
+            try {
+                tugasRepository.insert(newTugas)
+                _error.value = null
+            } catch (e: Exception) {
+                _error.postValue("Failed to add Tugas: ${e.message}")
+            }
         }
     }
-    fun updateTugas(tugas: Tugas){
+
+    fun updateTugas(tugas: Tugas) {
         viewModelScope.launch {
-            tugasRepository.update(tugas)  // You need to implement update() in TugasRepository
+            try {
+                tugasRepository.update(tugas)
+            } catch (e: Exception) {
+                _error.postValue("Failed to update Tugas: ${e.message}")
+            }
+        }
+    }
+    private fun fetchTugasWithPhotos() {
+        viewModelScope.launch {
+            try {
+                _tugasWithPhotos.value = tugasRepository.getTugasWithPhotos().value
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
         }
     }
 }

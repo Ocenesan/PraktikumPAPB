@@ -17,4 +17,7 @@ interface TugasDAO {
 
     @Update
     fun update(tugas: Tugas)
+
+    @Query("SELECT * FROM tugas WHERE photo_uri IS NOT NULL")
+    fun getTugasWithPhotos(): LiveData<List<Tugas>>
 }

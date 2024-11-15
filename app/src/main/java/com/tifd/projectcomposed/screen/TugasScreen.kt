@@ -8,10 +8,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -26,12 +23,14 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.tifd.projectcomposed.R
 import com.tifd.projectcomposed.viewmodel.MainViewModel
 import com.tifd.projectcomposed.viewmodel.MainViewModelFactory
@@ -46,6 +45,7 @@ fun TugasScreen() {
     )
     var matkul by remember { mutableStateOf("") }
     var detailTugas by remember { mutableStateOf("") }
+    var capturedPhotoUri by remember { mutableStateOf<Uri?>(null) }
     val tugasList by mainViewModel.tugasList.observeAsState(initial = emptyList())
     var showCamera by remember { mutableStateOf(false) }
 
@@ -73,37 +73,60 @@ fun TugasScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Button(onClick = {
-                mainViewModel.addTugas(matkul, detailTugas)
-                matkul = ""
-                detailTugas = ""
-            }) {
-                Text("Add Tugas")
-            }
-
-            Button(onClick = {
-                // Cek izin kamera sebelum menampilkan kamera
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                    showCamera = true
+        if (!showCamera) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Button(onClick = {
+                    if (matkul.isNotBlank() && detailTugas.isNotBlank()) {
+                        mainViewModel.addTugas(
+                            matkul = matkul,
+                            detailTugas = detailTugas,
+                            photoUri = capturedPhotoUri?.toString() // Add photo if available
+                        )
+                        matkul = ""
+                        detailTugas = ""
+                        capturedPhotoUri = null
+                    } else {
+                        Toast.makeText(context, "Matkul and Detail Tugas cannot be empty!", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Text("Add Tugas")
                 }
-            }) {
-                Text(if (showCamera) "Close Camera" else "Open Camera")
+
+                Button(onClick = {
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                        showCamera = true
+                    } else {
+                        Toast.makeText(context, "Camera permission required!", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Text("Open Camera")
+                }
             }
+
+            // Preview of the captured photo (if available)
+            capturedPhotoUri?.let { uri ->
+                Spacer(modifier = Modifier.height(8.dp))
+                AsyncImage(
+                    model = uri,
+                    contentDescription = "Captured Photo",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        } else {
+            // Show CameraXPreview
+            CameraXPreview(
+                onImageCaptured = { imageUri ->
+                    capturedPhotoUri = imageUri
+                    showCamera = false // Close camera after capturing photo
+                },
+                onCloseCamera = { showCamera = false }
+            )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (showCamera) {
-            CameraXPreview(onImageCaptured = { imageUri ->
-                // Handle hasil foto, bisa disimpan ke ViewModel atau lokasi lain
-                showCamera = false // Menutup kamera setelah foto diambil
-
-                // Contoh: Menampilkan URI gambar dalam Toast
-                Toast.makeText(context, "Gambar disimpan di: $imageUri", Toast.LENGTH_LONG).show()
-            })
-        }
-
 
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             items(tugasList) { tugas ->
@@ -122,7 +145,8 @@ fun TugasCard(tugas: Tugas, onTaskCompleted: (Tugas) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -131,9 +155,22 @@ fun TugasCard(tugas: Tugas, onTaskCompleted: (Tugas) -> Unit) {
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Column {
-                Text(text = tugas.matkul)
-                Text(text = tugas.detailTugas)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = tugas.matkul, style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = tugas.detailTugas, style = MaterialTheme.typography.bodyMedium)
+
+                if (!tugas.photoUri.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AsyncImage(
+                        model = tugas.photoUri,
+                        contentDescription = "Task Photo",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                    )
+                }
             }
 
             IconButton(onClick = {
@@ -141,8 +178,11 @@ fun TugasCard(tugas: Tugas, onTaskCompleted: (Tugas) -> Unit) {
                 onTaskCompleted(tugas.copy(selesai = isCompleted))
             }) {
                 Icon(
-                    painter = painterResource(id = if (isCompleted) R.drawable.baseline_check_circle_24 else R.drawable.baseline_cancel_24),
-                    contentDescription = if (isCompleted) "Task Completed" else "Task Incomplete",
+                    painter = painterResource(
+                        id = if (isCompleted) R.drawable.baseline_check_circle_24
+                        else R.drawable.baseline_cancel_24
+                    ),
+                    contentDescription = if (isCompleted) "Task Completed" else "Task Incomplete"
                 )
             }
         }
@@ -150,20 +190,19 @@ fun TugasCard(tugas: Tugas, onTaskCompleted: (Tugas) -> Unit) {
 }
 
 @Composable
-fun CameraXPreview(onImageCaptured: (Uri) -> Unit) {
+fun CameraXPreview(onImageCaptured: (Uri) -> Unit, onCloseCamera: () -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
     val previewView = remember { PreviewView(context) }
     var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
-    var lensFacing by remember { mutableIntStateOf(CameraSelector.LENS_FACING_BACK) }
 
-    LaunchedEffect(cameraProviderFuture, lensFacing) {
+    LaunchedEffect(cameraProviderFuture) {
         val cameraProvider = cameraProviderFuture.get()
         val preview = Preview.Builder().build().also {
             it.setSurfaceProvider(previewView.surfaceProvider)
         }
-        val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
         imageCapture = ImageCapture.Builder().build()
 
@@ -177,72 +216,46 @@ fun CameraXPreview(onImageCaptured: (Uri) -> Unit) {
         }
     }
 
-    // Launcher untuk meminta izin kamera
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { granted ->
-            val cameraGranted = granted.getOrDefault(Manifest.permission.CAMERA, false)
-            val storageGranted = granted.getOrDefault(Manifest.permission.WRITE_EXTERNAL_STORAGE, false)
-            if (cameraGranted && storageGranted) {
-                // Izin diberikan
-                Log.d("CameraContent", "Izin diberikan") // Tambahkan logging
-            } else {
-                Toast.makeText(context, "Izin Kamera dan Penyimpanan dibutuhkan", Toast.LENGTH_SHORT).show()
-                Log.d("CameraContent", "Izin ditolak") // Tambahkan logging
-            }
-        }
-    )
-
     Column {
-        Box(modifier = Modifier.fillMaxWidth().height(400.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp)
+        ) {
             AndroidView(
                 factory = { previewView },
-                modifier = Modifier
-                    .size(width = 300.dp, height = 150.dp)
-                    .align(Alignment.Center)
+                modifier = Modifier.fillMaxSize()
             )
-            Box(modifier = Modifier.fillMaxWidth().align(Alignment.TopEnd)) {
-                IconButton(
-                    onClick = {
-                        lensFacing =
-                            if (lensFacing == CameraSelector.LENS_FACING_BACK) CameraSelector.LENS_FACING_FRONT
-                            else CameraSelector.LENS_FACING_BACK
-                    },
-                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(if (lensFacing == CameraSelector.LENS_FACING_BACK) R.drawable.baseline_flip_camera_ios_24 else R.drawable.baseline_flip_camera_ios_24),
-                        contentDescription = "Flip Camera",
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-            }
-            if (imageCapture != null) {
-                Box(modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)) {
-                    Button(onClick = {
-                        launcher.launch(
-                            arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        )
-                        takePhoto(context, imageCapture, onImageCaptured)
-                    },
-                        modifier = Modifier.align(Alignment.BottomCenter).padding(8.dp)) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.baseline_radio_button_checked_32), // Ganti dengan drawable Anda
-                            contentDescription = "Take Photo",
-                            modifier = Modifier.size(32.dp) // Sesuaikan ukuran
-                        )
-                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                        Text("Take Photo")
+
+            Button(
+                onClick = {
+                    takePhoto(context, imageCapture) { uri ->
+                        onImageCaptured(uri)
                     }
-                }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+            ) {
+                Text("Take Photo")
+            }
+
+            Button(
+                onClick = { onCloseCamera() },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+            ) {
+                Text("Close Camera")
             }
         }
     }
 }
 
 fun takePhoto(context: Context, imageCapture: ImageCapture?, onImageCaptured: (Uri) -> Unit) {
+    val fileName = "${System.currentTimeMillis()}.jpg"
     val contentValues = ContentValues().apply {
-        put(MediaStore.MediaColumns.DISPLAY_NAME, System.currentTimeMillis().toString())
+        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
         put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
             put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/TugasApp")
@@ -255,12 +268,13 @@ fun takePhoto(context: Context, imageCapture: ImageCapture?, onImageCaptured: (U
     imageCapture?.takePicture(
         outputOptions,
         ContextCompat.getMainExecutor(context),
-        object: ImageCapture.OnImageSavedCallback {
+        object : ImageCapture.OnImageSavedCallback {
             override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                 onImageCaptured(output.savedUri!!)
             }
+
             override fun onError(exc: ImageCaptureException) {
-                Toast.makeText(context, "Gagal mengambil gambar: ${exc.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Failed to capture image: ${exc.message}", Toast.LENGTH_SHORT).show()
             }
         }
     )

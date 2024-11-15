@@ -17,5 +17,7 @@ data class Tugas(
     @ColumnInfo(name = "detail_tugas")
     val detailTugas: String = "",
     @ColumnInfo(name = "selesai")
-    val selesai: Boolean = false
+    val selesai: Boolean = false,
+    @ColumnInfo(name = "photo_uri")
+    val photoUri: String? = null
 ) : Parcelable
