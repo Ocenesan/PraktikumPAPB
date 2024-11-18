@@ -120,7 +120,7 @@ fun TugasScreen() {
                         } else {
                             Toast.makeText(
                                 context,
-                                "Matkul and Detail Tugas tidak boleh kosong!",
+                                "Mata kuliah and Detail tugas tidak boleh kosong!",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
