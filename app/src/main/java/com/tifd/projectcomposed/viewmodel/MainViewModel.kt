@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tifd.projectcomposed.local.Tugas
 import com.tifd.projectcomposed.local.TugasRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MainViewModel(private val tugasRepository: TugasRepository) : ViewModel() {
@@ -74,6 +75,16 @@ class MainViewModel(private val tugasRepository: TugasRepository) : ViewModel() 
                 _tugasWithPhotos.value = tugasRepository.getTugasWithPhotos().value
             } catch (e: Exception) {
                 _error.value = e.message
+            }
+        }
+    }
+
+    fun deleteTugas(tugas: Tugas) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                tugasRepository.delete(tugas) // Use tugasRepository
+            } catch (e: Exception) {
+                _error.postValue("Failed to delete Tugas: ${e.message}")
             }
         }
     }

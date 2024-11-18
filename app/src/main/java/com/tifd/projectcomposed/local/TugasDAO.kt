@@ -2,6 +2,7 @@ package com.tifd.projectcomposed.local
 
 import androidx.room.Dao
 import androidx.lifecycle.LiveData
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -20,4 +21,7 @@ interface TugasDAO {
 
     @Query("SELECT * FROM tugas WHERE photo_uri IS NOT NULL")
     fun getTugasWithPhotos(): LiveData<List<Tugas>>
+
+    @Delete
+    fun delete(tugas: Tugas)
 }

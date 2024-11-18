@@ -170,7 +170,6 @@ fun TugasScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
             } else {
-                // Show CameraXPreview
                 CameraXPreview(
                     onImageCaptured = { imageUri ->
                         capturedPhotoUri = imageUri
@@ -182,9 +181,11 @@ fun TugasScreen() {
 
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 items(tugasList) { tugas ->
-                    TugasCard(tugas) { updatedTugas ->
-                        mainViewModel.updateTugas(updatedTugas)
-                    }
+                    TugasCard(
+                        tugas,
+                        onTaskCompleted = { updatedTugas -> mainViewModel.updateTugas(updatedTugas) },
+                        onTaskDelete = { tugasToDelete -> mainViewModel.deleteTugas(tugasToDelete) } // Pass callback
+                    )
                 }
             }
         }
@@ -192,7 +193,7 @@ fun TugasScreen() {
 }
 
 @Composable
-fun TugasCard(tugas: Tugas, onTaskCompleted: (Tugas) -> Unit) {
+fun TugasCard(tugas: Tugas, onTaskCompleted: (Tugas) -> Unit, onTaskDelete: (Tugas) -> Unit) {
     var isCompleted by remember { mutableStateOf(tugas.selesai) }
 
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary),
@@ -240,6 +241,13 @@ fun TugasCard(tugas: Tugas, onTaskCompleted: (Tugas) -> Unit) {
                         else R.drawable.baseline_cancel_24
                     ),
                     contentDescription = if (isCompleted) "Task Completed" else "Task Incomplete"
+                )
+            }
+            IconButton(onClick = { onTaskDelete(tugas) }) {  // Delete button
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_delete_forever_24),
+                    contentDescription = "Delete Task",
+                    tint = MaterialTheme.colorScheme.onError
                 )
             }
         }

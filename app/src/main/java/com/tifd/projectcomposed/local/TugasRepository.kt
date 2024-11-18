@@ -20,6 +20,9 @@ class TugasRepository(application: Application) {
     fun update(tugas: Tugas) {
         executorService.execute { nTugasDAO.update(tugas) } // You'll need an update query in TugasDAO
     }
+    fun delete(tugas: Tugas) {
+        executorService.execute { nTugasDAO.delete(tugas) }
+    }
 
     fun getTugasWithPhotos(): LiveData<List<Tugas>> = nTugasDAO.getTugasWithPhotos()
 }
