@@ -57,7 +57,7 @@ fun LoginScreen(navController: NavController, onLoginSuccess: () -> Unit) {
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = LightPurple),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary),
                 elevation = CardDefaults.cardElevation(8.dp),
                 shape = MaterialTheme.shapes.medium
             ) {
@@ -92,13 +92,13 @@ fun LoginScreen(navController: NavController, onLoginSuccess: () -> Unit) {
                             label = { Text("Email") },
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                                focusedTextColor = MaterialTheme.colorScheme.onSecondary,
                                 unfocusedBorderColor = MaterialTheme.colorScheme.surface
                             )
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -117,7 +117,7 @@ fun LoginScreen(navController: NavController, onLoginSuccess: () -> Unit) {
                             visualTransformation = PasswordVisualTransformation(),
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                                focusedTextColor = MaterialTheme.colorScheme.onSecondary,
                                 unfocusedBorderColor = MaterialTheme.colorScheme.surface
                             )
                         )

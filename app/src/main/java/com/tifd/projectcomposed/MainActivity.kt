@@ -25,8 +25,7 @@ import com.tifd.projectcomposed.screen.LoginScreen
 import com.tifd.projectcomposed.screen.MatkulScreen
 import com.tifd.projectcomposed.screen.ProfileScreen
 import com.tifd.projectcomposed.screen.TugasScreen
-import com.tifd.projectcomposed.ui.theme.ProjectComposeDTheme
-
+import com.tifd.projectcomposed.ui.theme.*
 
 class MainActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
@@ -78,7 +77,7 @@ fun BottomAppBar(
 
     NavigationBar(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = MaterialTheme.colorScheme.tertiary,
     ) {
         val navigationitems = listOf(
             Navigationitem(
@@ -104,7 +103,7 @@ fun BottomAppBar(
                     Icon(
                         painter = item.icon,
                         contentDescription = item.title,
-                        tint = Color.Gray
+                        tint = LightPurple
                     )
                 },
                 label = { Text(item.title) },

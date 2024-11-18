@@ -1,6 +1,5 @@
 package com.tifd.projectcomposed.screen
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,14 +8,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.tifd.projectcomposed.GithubProfile
 import com.tifd.projectcomposed.R
+import com.tifd.projectcomposed.ui.theme.LightPurple
 
 data class mataKuliah(
     val namaMatkul: String = "",
@@ -33,7 +37,7 @@ fun MatkulScreen() {
     var mataKuliahList by remember { mutableStateOf(emptyList<mataKuliah>()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    val context = LocalContext.current
+    //val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         Log.d("ListActivity", "Starting Firestore fetch")
@@ -69,35 +73,32 @@ fun MatkulScreen() {
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text("Jadwal Mata Kuliah") })
+            contentColorFor(backgroundColor = MaterialTheme.colorScheme.tertiary)
+            CenterAlignedTopAppBar(
+                title = { Text("Jadwal Mata Kuliah", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.SansSerif,
+                    fontWeight = FontWeight.Bold) }
+            )
         }
-//        floatingActionButton = {
-//            FloatingActionButton(
-//                onClick = {
-//                    val intent = Intent(context, GithubProfile::class.java)
-//                    startActivity(context, intent, null)
-//                },
-//                containerColor = MaterialTheme.colorScheme.primary
-//            ) {
-//                Icon(
-//                    painterResource(id = R.drawable.github_logo_96), // Replace with your GitHub logo resource
-//                    contentDescription = "GitHub Profile"
-//                )
-//            }
-//        }
     ){ innerPadding ->  // Use innerPadding to avoid content being obscured by system bars
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding), // Apply inner padding here
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.tertiary),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (isLoading) {
-                CircularProgressIndicator(
+                Box(
                     modifier = Modifier
-                        .padding(top = 16.dp)
+                        .fillMaxSize()
                         .wrapContentSize(Alignment.Center)
-                )
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.tertiary)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "Loading...", style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
             } else if (mataKuliahList.isEmpty()) {
                 Text(
                     text = errorMessage ?: "No data found",
@@ -105,7 +106,16 @@ fun MatkulScreen() {
                 )
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.surface
+                                )
+                            )
+                        ),
                     contentPadding = PaddingValues(16.dp) // Consistent padding
                 ) {
                     items(mataKuliahList) { MataKuliah ->
@@ -120,17 +130,19 @@ fun MatkulScreen() {
 
 @Composable
 fun OutlinedCardExample(mataKuliah: mataKuliah) {
+    // State to manage the expanded state of the card
+    var expanded by remember { mutableStateOf(false) }
+
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.secondary
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth()
-            .wrapContentHeight(),
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(4.dp) // Menambahkan sedikit bayangan
+            .clickable { expanded = !expanded }, // Toggle expansion on click
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -139,7 +151,7 @@ fun OutlinedCardExample(mataKuliah: mataKuliah) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    painter = painterResource(id = R.drawable.baseline_book_24), // Drawable for mata kuliah
+                    painter = painterResource(id = R.drawable.baseline_book_24),
                     contentDescription = "Mata Kuliah",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
@@ -147,67 +159,102 @@ fun OutlinedCardExample(mataKuliah: mataKuliah) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = mataKuliah.namaMatkul,
-                    style = MaterialTheme.typography.headlineSmall.copy(color = MaterialTheme.colorScheme.onSurface),
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.surface),
+                    modifier = Modifier.padding(8.dp)
                 )
             }
 
-            HorizontalDivider(
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-            )
+            if (expanded) {
+                // Expanded content
+                HorizontalDivider(
+                    thickness = 3.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                )
 
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_location_on_24), // Drawable for room
-                    contentDescription = "Ruang",
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Ruang: ${mataKuliah.ruang}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_calendar_month_24), // Drawable for day
-                    contentDescription = "Hari",
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Hari: ${mataKuliah.hari}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_access_time_24), // Drawable for time
-                    contentDescription = "Jam",
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Jam: ${mataKuliah.jam}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-                Icon(
-                    painter = painterResource(id = if (mataKuliah.is_praktikum) R.drawable.baseline_check_circle_24 else R.drawable.baseline_cancel_24), // Drawable for praktikum
-                    contentDescription = "Praktikum",
-                    tint = if (mataKuliah.is_praktikum) Color.Green else Color.Red,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = if (mataKuliah.is_praktikum) "Praktikum" else "Praktikum",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(horizontalAlignment = Alignment.Start) { // Hari & Ruang in a Column
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {  // Hari
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_calendar_month_24),
+                                contentDescription = "Hari",
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = mataKuliah.hari,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Black,
+                                modifier = Modifier
+                                    .background(LightPurple, shape = RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {  // Ruang
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_location_on_24),
+                                contentDescription = "Ruang",
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = mataKuliah.ruang,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Black,
+                                modifier = Modifier
+                                    .background(LightPurple, shape = RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {  // Jam
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_access_time_24),
+                            contentDescription = "Jam",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Jam: ${mataKuliah.jam}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .background(LightPurple, shape = RoundedCornerShape(8.dp))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
+                    Icon(
+                        painter = painterResource(id = if (mataKuliah.is_praktikum) R.drawable.baseline_check_circle_24 else R.drawable.baseline_cancel_24), // Drawable for praktikum
+                        contentDescription = "Praktikum",
+                        tint = if (mataKuliah.is_praktikum) Color.Green else Color.Red,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (mataKuliah.is_praktikum) "Praktikum" else "Non-Praktikum",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black,
+                        modifier = Modifier
+                            .background(LightPurple, shape = RoundedCornerShape(8.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
             }
         }
     }
