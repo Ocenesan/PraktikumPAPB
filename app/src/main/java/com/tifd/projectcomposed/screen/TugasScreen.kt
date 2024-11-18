@@ -120,7 +120,7 @@ fun TugasScreen() {
                         } else {
                             Toast.makeText(
                                 context,
-                                "Matkul and Detail Tugas cannot be empty!",
+                                "Matkul and Detail Tugas tidak boleh kosong!",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -261,13 +261,13 @@ fun CameraXPreview(onImageCaptured: (Uri) -> Unit, onCloseCamera: () -> Unit) {
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
     val previewView = remember { PreviewView(context) }
     var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
+    var cameraSelector by remember { mutableStateOf(CameraSelector.DEFAULT_BACK_CAMERA) }
 
-    LaunchedEffect(cameraProviderFuture) {
+    LaunchedEffect(cameraProviderFuture, cameraSelector) {
         val cameraProvider = cameraProviderFuture.get()
         val preview = Preview.Builder().build().also {
             it.setSurfaceProvider(previewView.surfaceProvider)
         }
-        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
         imageCapture = ImageCapture.Builder().build()
 
@@ -281,45 +281,72 @@ fun CameraXPreview(onImageCaptured: (Uri) -> Unit, onCloseCamera: () -> Unit) {
         }
     }
 
-    Column {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(400.dp)
-        ) {
-            AndroidView(
-                factory = { previewView },
-                modifier = Modifier.fillMaxSize()
-            )
-
-            Button(
-                onClick = {
-                    takePhoto(context, imageCapture) { uri ->
-                        onImageCaptured(uri)
-                    }
-                },
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ){
+        Column {
+            Box(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Pink80,
-                    contentColor = Color.Black
-                )
+                    .fillMaxWidth()
+                    .height(400.dp)
             ) {
-                Text("Take Photo")
-            }
+                AndroidView(
+                    factory = { previewView },
+                    modifier = Modifier.fillMaxSize()
+                )
 
-            Button(
-                onClick = { onCloseCamera() },
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = PurpleGrey80,
-                    contentColor = Color.Black
-                )
-            ) {
-                Text("Close Camera")
+                Button(
+                    onClick = {
+                        takePhoto(context, imageCapture) { uri ->
+                            onImageCaptured(uri)
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Pink80,
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Text("Take Photo")
+                }
+
+                IconButton(
+                    onClick = {
+                        cameraSelector = if (cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
+                            CameraSelector.DEFAULT_FRONT_CAMERA
+                        } else {
+                            CameraSelector.DEFAULT_BACK_CAMERA
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(16.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_flip_camera_ios_24),
+                        contentDescription = "Flip Camera",
+                        tint = Color.White
+                    )
+                }
+
+                Button(
+                    onClick = { onCloseCamera() },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = PurpleGrey80,
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Text("Close Camera")
+                }
             }
         }
     }
