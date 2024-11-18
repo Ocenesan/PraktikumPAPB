@@ -39,6 +39,7 @@ import com.tifd.projectcomposed.viewmodel.MainViewModel
 import com.tifd.projectcomposed.viewmodel.MainViewModelFactory
 import com.tifd.projectcomposed.local.Tugas
 import com.tifd.projectcomposed.ui.theme.Pink80
+import com.tifd.projectcomposed.ui.theme.Purple80
 import com.tifd.projectcomposed.ui.theme.PurpleGrey80
 
 @Composable
@@ -73,7 +74,14 @@ fun TugasScreen() {
                 value = matkul,
                 onValueChange = { matkul = it },
                 label = { Text("Matkul") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                    focusedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -82,7 +90,14 @@ fun TugasScreen() {
                 value = detailTugas,
                 onValueChange = { detailTugas = it },
                 label = { Text("Detail Tugas") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.tertiary,
+                    focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                    focusedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -111,7 +126,7 @@ fun TugasScreen() {
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = PurpleGrey80,
+                        containerColor = Purple80,
                         contentColor = Color.White)
                     ) {
                         Text("Add Tugas")
@@ -133,7 +148,7 @@ fun TugasScreen() {
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
-                            containerColor = PurpleGrey80,
+                            containerColor = Purple80,
                             contentColor = Color.White)
                     ) {
                         Text("Open Camera")

@@ -93,6 +93,7 @@ fun LoginScreen(navController: NavController, onLoginSuccess: () -> Unit) {
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = MaterialTheme.colorScheme.onSecondary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.surface,
                                 unfocusedBorderColor = MaterialTheme.colorScheme.surface
                             )
                         )
@@ -118,6 +119,7 @@ fun LoginScreen(navController: NavController, onLoginSuccess: () -> Unit) {
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = MaterialTheme.colorScheme.onSecondary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.surface,
                                 unfocusedBorderColor = MaterialTheme.colorScheme.surface
                             )
                         )
