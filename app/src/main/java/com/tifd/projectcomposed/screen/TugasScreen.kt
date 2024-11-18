@@ -16,6 +16,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -195,11 +196,13 @@ fun TugasScreen() {
 @Composable
 fun TugasCard(tugas: Tugas, onTaskCompleted: (Tugas) -> Unit, onTaskDelete: (Tugas) -> Unit) {
     var isCompleted by remember { mutableStateOf(tugas.selesai) }
+    var expanded by remember { mutableStateOf(false) }
 
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .clickable { expanded = !expanded },
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(
@@ -215,19 +218,22 @@ fun TugasCard(tugas: Tugas, onTaskCompleted: (Tugas) -> Unit, onTaskDelete: (Tug
                     thickness = 3.dp,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = tugas.detailTugas, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(8.dp))
 
-                if (!tugas.photoUri.isNullOrEmpty()) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    AsyncImage(
-                        model = tugas.photoUri,
-                        contentDescription = "Task Photo",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(150.dp)
-                            .clip(MaterialTheme.shapes.medium)
-                    )
+                if (expanded){
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = tugas.detailTugas, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(8.dp))
+
+                    if (!tugas.photoUri.isNullOrEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        AsyncImage(
+                            model = tugas.photoUri,
+                            contentDescription = "Task Photo",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
+                                .clip(MaterialTheme.shapes.medium)
+                        )
+                    }
                 }
             }
 

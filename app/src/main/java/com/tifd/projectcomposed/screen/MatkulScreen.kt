@@ -128,7 +128,6 @@ fun MatkulScreen() {
 
 @Composable
 fun OutlinedCardExample(mataKuliah: mataKuliah) {
-    // State to manage the expanded state of the card
     var expanded by remember { mutableStateOf(false) }
 
     Card(

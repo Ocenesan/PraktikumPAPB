@@ -103,10 +103,21 @@ fun BottomAppBar(
                     Icon(
                         painter = item.icon,
                         contentDescription = item.title,
-                        tint = LightPurple
+                        tint = if (currentRoute == item.screen.route) {
+                            MaterialTheme.colorScheme.onPrimary // Selected color
+                        } else {
+                            MaterialTheme.colorScheme.primary // Unselected color
+                        }
                     )
                 },
-                label = { Text(item.title) },
+                label = { Text(item.title,
+                    color = if (currentRoute == item.screen.route) {
+                        MaterialTheme.colorScheme.onPrimary // Selected color
+                    } else {
+                        MaterialTheme.colorScheme.onSecondary // Unselected color
+                    }
+                    )
+                },
                 selected = currentRoute == item.screen.route,
                 onClick = {
                     navController.navigate(item.screen.route) {
