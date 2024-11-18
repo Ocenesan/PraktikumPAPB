@@ -73,7 +73,6 @@ fun MatkulScreen() {
 
     Scaffold(
         topBar = {
-            contentColorFor(backgroundColor = MaterialTheme.colorScheme.tertiary)
             CenterAlignedTopAppBar(
                 title = { Text("Jadwal Mata Kuliah", style = MaterialTheme.typography.titleLarge, fontFamily = FontFamily.SansSerif,
                     fontWeight = FontWeight.Bold) }
@@ -83,8 +82,7 @@ fun MatkulScreen() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.tertiary),
+                .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (isLoading) {

@@ -15,6 +15,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,6 +25,8 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -35,6 +38,8 @@ import com.tifd.projectcomposed.R
 import com.tifd.projectcomposed.viewmodel.MainViewModel
 import com.tifd.projectcomposed.viewmodel.MainViewModelFactory
 import com.tifd.projectcomposed.local.Tugas
+import com.tifd.projectcomposed.ui.theme.Pink80
+import com.tifd.projectcomposed.ui.theme.PurpleGrey80
 
 @Composable
 fun TugasScreen() {
@@ -49,89 +54,122 @@ fun TugasScreen() {
     val tugasList by mainViewModel.tugasList.observeAsState(initial = emptyList())
     var showCamera by remember { mutableStateOf(false) }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.surface)
+                )
+            )
     ) {
-        OutlinedTextField(
-            value = matkul,
-            onValueChange = { matkul = it },
-            label = { Text("Matkul") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
+                value = matkul,
+                onValueChange = { matkul = it },
+                label = { Text("Matkul") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = detailTugas,
-            onValueChange = { detailTugas = it },
-            label = { Text("Detail Tugas") },
-            modifier = Modifier.fillMaxWidth()
-        )
+            OutlinedTextField(
+                value = detailTugas,
+                onValueChange = { detailTugas = it },
+                label = { Text("Detail Tugas") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        if (!showCamera) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Button(onClick = {
-                    if (matkul.isNotBlank() && detailTugas.isNotBlank()) {
-                        mainViewModel.addTugas(
-                            matkul = matkul,
-                            detailTugas = detailTugas,
-                            photoUri = capturedPhotoUri?.toString() // Add photo if available
-                        )
-                        matkul = ""
-                        detailTugas = ""
-                        capturedPhotoUri = null
-                    } else {
-                        Toast.makeText(context, "Matkul and Detail Tugas cannot be empty!", Toast.LENGTH_SHORT).show()
+            if (!showCamera) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(onClick = {
+                        if (matkul.isNotBlank() && detailTugas.isNotBlank()) {
+                            mainViewModel.addTugas(
+                                matkul = matkul,
+                                detailTugas = detailTugas,
+                                photoUri = capturedPhotoUri?.toString() // Add photo if available
+                            )
+                            matkul = ""
+                            detailTugas = ""
+                            capturedPhotoUri = null
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Matkul and Detail Tugas cannot be empty!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = PurpleGrey80,
+                        contentColor = Color.White)
+                    ) {
+                        Text("Add Tugas")
                     }
-                }) {
-                    Text("Add Tugas")
+
+                    Button(onClick = {
+                        if (ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.CAMERA
+                            ) == PackageManager.PERMISSION_GRANTED
+                        ) {
+                            showCamera = true
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Camera permission required!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                            containerColor = PurpleGrey80,
+                            contentColor = Color.White)
+                    ) {
+                        Text("Open Camera")
+                    }
                 }
 
-                Button(onClick = {
-                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                        showCamera = true
-                    } else {
-                        Toast.makeText(context, "Camera permission required!", Toast.LENGTH_SHORT).show()
-                    }
-                }) {
-                    Text("Open Camera")
+                // Preview of the captured photo (if available)
+                capturedPhotoUri?.let { uri ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AsyncImage(
+                        model = uri,
+                        contentDescription = "Captured Photo",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                    )
                 }
-            }
 
-            // Preview of the captured photo (if available)
-            capturedPhotoUri?.let { uri ->
-                Spacer(modifier = Modifier.height(8.dp))
-                AsyncImage(
-                    model = uri,
-                    contentDescription = "Captured Photo",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp)
-                        .clip(MaterialTheme.shapes.medium)
+                Spacer(modifier = Modifier.height(16.dp))
+            } else {
+                // Show CameraXPreview
+                CameraXPreview(
+                    onImageCaptured = { imageUri ->
+                        capturedPhotoUri = imageUri
+                        showCamera = false // Close camera after capturing photo
+                    },
+                    onCloseCamera = { showCamera = false }
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-        } else {
-            // Show CameraXPreview
-            CameraXPreview(
-                onImageCaptured = { imageUri ->
-                    capturedPhotoUri = imageUri
-                    showCamera = false // Close camera after capturing photo
-                },
-                onCloseCamera = { showCamera = false }
-            )
-        }
-
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(tugasList) { tugas ->
-                TugasCard(tugas) { updatedTugas ->
-                    mainViewModel.updateTugas(updatedTugas)
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                items(tugasList) { tugas ->
+                    TugasCard(tugas) { updatedTugas ->
+                        mainViewModel.updateTugas(updatedTugas)
+                    }
                 }
             }
         }
@@ -142,7 +180,7 @@ fun TugasScreen() {
 fun TugasCard(tugas: Tugas, onTaskCompleted: (Tugas) -> Unit) {
     var isCompleted by remember { mutableStateOf(tugas.selesai) }
 
-    Card(
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
@@ -156,9 +194,13 @@ fun TugasCard(tugas: Tugas, onTaskCompleted: (Tugas) -> Unit) {
                 .fillMaxWidth()
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = tugas.matkul, style = MaterialTheme.typography.titleMedium)
+                Text(text = tugas.matkul, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(8.dp))
+                HorizontalDivider(
+                    thickness = 3.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = tugas.detailTugas, style = MaterialTheme.typography.bodyMedium)
+                Text(text = tugas.detailTugas, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(8.dp))
 
                 if (!tugas.photoUri.isNullOrEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
@@ -235,7 +277,11 @@ fun CameraXPreview(onImageCaptured: (Uri) -> Unit, onCloseCamera: () -> Unit) {
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(16.dp)
+                    .padding(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Pink80,
+                    contentColor = Color.Black
+                )
             ) {
                 Text("Take Photo")
             }
@@ -244,7 +290,11 @@ fun CameraXPreview(onImageCaptured: (Uri) -> Unit, onCloseCamera: () -> Unit) {
                 onClick = { onCloseCamera() },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(16.dp)
+                    .padding(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = PurpleGrey80,
+                    contentColor = Color.Black
+                )
             ) {
                 Text("Close Camera")
             }
