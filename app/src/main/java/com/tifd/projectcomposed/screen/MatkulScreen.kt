@@ -21,6 +21,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.tifd.projectcomposed.R
 import com.tifd.projectcomposed.ui.theme.LightPurple
+import com.tifd.projectcomposed.ui.theme.Pink80
 
 data class mataKuliah(
     val namaMatkul: String = "",
@@ -190,7 +191,7 @@ fun OutlinedCardExample(mataKuliah: mataKuliah) {
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Black,
                                 modifier = Modifier
-                                    .background(LightPurple, shape = RoundedCornerShape(8.dp))
+                                    .background(Pink80, shape = RoundedCornerShape(8.dp))
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                         }
@@ -210,7 +211,7 @@ fun OutlinedCardExample(mataKuliah: mataKuliah) {
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Black,
                                 modifier = Modifier
-                                    .background(LightPurple, shape = RoundedCornerShape(8.dp))
+                                    .background(Pink80, shape = RoundedCornerShape(8.dp))
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                         }
@@ -229,7 +230,7 @@ fun OutlinedCardExample(mataKuliah: mataKuliah) {
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Black,
                             modifier = Modifier
-                                .background(LightPurple, shape = RoundedCornerShape(8.dp))
+                                .background(Pink80, shape = RoundedCornerShape(8.dp))
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
@@ -239,7 +240,7 @@ fun OutlinedCardExample(mataKuliah: mataKuliah) {
                     Icon(
                         painter = painterResource(id = if (mataKuliah.is_praktikum) R.drawable.baseline_check_circle_24 else R.drawable.baseline_cancel_24), // Drawable for praktikum
                         contentDescription = "Praktikum",
-                        tint = if (mataKuliah.is_praktikum) Color.Green else Color.Red,
+                        tint = if (mataKuliah.is_praktikum) Color.White else Color.Black,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -248,7 +249,7 @@ fun OutlinedCardExample(mataKuliah: mataKuliah) {
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Black,
                         modifier = Modifier
-                            .background(LightPurple, shape = RoundedCornerShape(8.dp))
+                            .background(Pink80, shape = RoundedCornerShape(8.dp))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }

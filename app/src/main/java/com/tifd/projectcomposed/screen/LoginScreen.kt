@@ -32,6 +32,28 @@ fun LoginScreen(navController: NavController, onLoginSuccess: () -> Unit) {
     var loginError by remember { mutableStateOf<String?>(null)}
     val auth = Firebase.auth
     val isLoading by remember { mutableStateOf(false) }
+    var loginAttempt by remember { mutableStateOf(false) }
+
+    LaunchedEffect(loginAttempt) {
+        if (loginAttempt) {
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        // Sign in success
+                        Toast.makeText(context, "Login berhasil!", Toast.LENGTH_SHORT).show()
+                        onLoginSuccess()
+                        navController.navigate(Screen.Matkul.route) {
+                            launchSingleTop = true
+                        }
+                    } else {
+                        // Login failed
+                        loginError = "Login gagal. Periksa email dan password Anda."
+                        Toast.makeText(context, "Login gagal!", Toast.LENGTH_SHORT).show()
+                    }
+                    loginAttempt = false // Reset loginAttempt
+                }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -129,27 +151,20 @@ fun LoginScreen(navController: NavController, onLoginSuccess: () -> Unit) {
 
                     Button(
                         onClick = {
-                            auth.signInWithEmailAndPassword(email, password)
-                                .addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        // Sign in success, navigate to the main screen
-                                        Toast.makeText(
-                                            context,
-                                            "Login berhasil!",
-                                            Toast.LENGTH_SHORT
-                                        )
-                                            .show()
-                                        onLoginSuccess()
-                                        navController.navigate(Screen.Matkul.route) { // Use navController.navigate
-                                            launchSingleTop = true
-                                        }
-                                    } else {
-                                        // If sign in fails, display a message to the user.
-                                        loginError = "Login gagal. Periksa email dan password Anda."
-                                        Toast.makeText(context, "Login gagal!", Toast.LENGTH_SHORT)
-                                            .show()
-                                    }
+                            when {
+                                email.isBlank() -> {
+                                    loginError = "Email tidak boleh kosong."
+                                    Toast.makeText(context, "Email tidak boleh kosong.", Toast.LENGTH_SHORT).show()
                                 }
+                                password.isBlank() -> {
+                                    loginError = "Password tidak boleh kosong."
+                                    Toast.makeText(context, "Password tidak boleh kosong.", Toast.LENGTH_SHORT).show()
+                                }
+                                else -> {
+                                    loginError = null // Clear previous error
+                                    loginAttempt = true
+                                }
+                            }
                         },
                         enabled = !isLoading,
                         modifier = Modifier.fillMaxWidth(),
